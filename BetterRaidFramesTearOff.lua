@@ -164,6 +164,7 @@ function BetterRaidFramesTearOff:OnDocumentReady()
 	Apollo.StopTimer("MainUpdateTimer")
 	
 	self.wndMain = Apollo.LoadForm(self.xmlDoc, "BetterRaidFramesTearOffForm", nil, self)
+	self.BetterRaidFrames = Apollo.GetAddon("BetterRaidFrames")
 
 	self.tTrackedMemberIdx = {}	
 	
@@ -314,7 +315,8 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 	wndRaidMember:FindChild("RaidMemberToTFrame"):Show(false)
 	wndRaidMember:FindChild("RaidMemberUntearBtn"):Show(false)
 	wndRaidMember:FindChild("RaidMemberUntearBtn"):SetData({Idx = nMemberIdx, Name = tMemberData.strCharacterName})
-
+	wndRaidMember:FindChild("RaidMemberBaseVitals"):SetData(nMemberIdx)
+	
 	local bShowRoleIcon = self.settings.bShowIcon_Role
 	if bShowRoleIcon then
 		local eRoleIdx = -1
@@ -910,7 +912,39 @@ function BetterRaidFramesTearOff:OnRaidTearOffCustomizeCombatLock( wndHandler, w
 	self:MainUpdateTimer()
 end
 
+---------------------------------------------------------------------------------------------------
+-- RaidTearMember Functions
+---------------------------------------------------------------------------------------------------
+
+function BetterRaidFramesTearOff:RaidMemberBaseVitals_OnMouseEnter( wndHandler, wndControl, x, y )
+	if not wndControl or not self.BetterRaidFrames.settings.bMouseOverSelection then
+		return
+	end
+
+	if wndControl:GetName() == "RaidMemberBaseVitals" then
+		if self.BetterRaidFrames.settings.bRememberPrevTarget and not self.bOldTargetSet then
+			self.PrevTarget = GameLib.GetTargetUnit()
+			self.bOldTargetSet = true
+		end
+
+		local idx = wndControl:GetData()
+		local unit = GroupLib.GetUnitForGroupMember(idx)
+		if unit ~= nil then
+			GameLib.SetTargetUnit(unit)
+		end
+	end
+end
+
+function BetterRaidFramesTearOff:RaidMemberBaseVitals_OnMouseExit( wndHandler, wndControl, x, y )
+	if not wndHandler or not wndControl or not self.BetterRaidFrames.settings.bMouseOverSelection or not self.BetterRaidFrames.settings.bRememberPrevTarget or not self.bOldTargetSet then
+		return
+	end
+	if wndHandler == wndControl then
+		GameLib.SetTargetUnit(self.PrevTarget)
+		self.bOldTargetSet = false
+	end
+end
+
 local BetterRaidFramesTearOffInst = BetterRaidFramesTearOff:new()
 BetterRaidFramesTearOffInst:Init()
-
 
