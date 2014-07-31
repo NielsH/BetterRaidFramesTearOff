@@ -310,7 +310,6 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 	end
 	local wndRaidMember = self:LoadByName("RaidTearMember", self.wndMain:FindChild("RaidTearOffContainer"), nMemberIdx)
 	local unitTarget = GameLib.GetTargetUnit()
-	local BetterRaidFrames = Apollo.GetAddon("BetterRaidFrames")
 	
 	wndRaidMember:FindChild("RaidMemberToTFrame"):Show(false)
 	wndRaidMember:FindChild("RaidMemberUntearBtn"):Show(false)
@@ -370,11 +369,11 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 		end
 		
 		-- Change the HP Bar Color if required for debuff tracking
-		self:TrackDebuffsHelper(unitMember, wndRaidMember, BetterRaidFrames)
+		self:TrackDebuffsHelper(unitMember, wndRaidMember)
 		-- Update text overlays		
-		self:UpdateHPText(tMemberData.nHealth, tMemberData.nHealthMax, wndRaidMember, tMemberData.strCharacterName, BetterRaidFrames)
-		self:UpdateShieldText(tMemberData.nShield, tMemberData.nShieldMax, wndRaidMember, BetterRaidFrames)
-		self:UpdateAbsorbText(tMemberData.nAbsorption, wndRaidMember, BetterRaidFrames)
+		self:UpdateHPText(tMemberData.nHealth, tMemberData.nHealthMax, wndRaidMember, tMemberData.strCharacterName)
+		self:UpdateShieldText(tMemberData.nShield, tMemberData.nShieldMax, wndRaidMember)
+		self:UpdateAbsorbText(tMemberData.nAbsorption, wndRaidMember)
 
 		-- Target of Target
 		if tMemberData.bIsLeader or tMemberData.bMainTank or tMemberData.bMainAssist then
@@ -383,14 +382,14 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 				wndRaidMember:FindChild("RaidMemberToTName"):SetData(unitToT)
 				wndRaidMember:FindChild("RaidMemberToTFrame"):SetSprite("CRB_Raid:btnRaidTear_ThinHoloListBtnNormal")
 				wndRaidMember:FindChild("RaidMemberAlignIcon"):SetSprite(ktDispositionToSprite[unitToT:GetDispositionTo(self.unitPlayerDisposComparison)])
-				self:DoHPAndShieldResizing(wndRaidMember:FindChild("RaidMemberToTVitals"), unitToT, false, BetterRaidFrames)
+				self:DoHPAndShieldResizing(wndRaidMember:FindChild("RaidMemberToTVitals"), unitToT, false)
 				
 				-- Change the HP Bar Color if required for debuff tracking
-				self:TrackDebuffsHelper(unitToT, wndRaidMember:FindChild("RaidMemberToTVitals"), BetterRaidFrames)
+				self:TrackDebuffsHelper(unitToT, wndRaidMember:FindChild("RaidMemberToTVitals"))
 				-- Update text overlays
-				self:UpdateHPText(unitToT:GetHealth(), unitToT:GetMaxHealth(), wndRaidMember:FindChild("RaidMemberToTVitals"), unitToT:GetName(), BetterRaidFrames)
-				self:UpdateShieldText(unitToT:GetShieldCapacity(), unitToT:GetShieldCapacityMax(), wndRaidMember:FindChild("RaidMemberToTVitals"), BetterRaidFrames)
-				self:UpdateAbsorbText(unitToT:GetAbsorptionValue(), wndRaidMember:FindChild("RaidMemberToTVitals"), BetterRaidFrames)
+				self:UpdateHPText(unitToT:GetHealth(), unitToT:GetMaxHealth(), wndRaidMember:FindChild("RaidMemberToTVitals"), unitToT:GetName())
+				self:UpdateShieldText(unitToT:GetShieldCapacity(), unitToT:GetShieldCapacityMax(), wndRaidMember:FindChild("RaidMemberToTVitals"))
+				self:UpdateAbsorbText(unitToT:GetAbsorptionValue(), wndRaidMember:FindChild("RaidMemberToTVitals"))
 
 				if unitTarget and unitTarget == unitToT then
 					wndRaidMember:FindChild("RaidMemberToTFrame"):SetSprite("CRB_Raid:btnRaidTear_ThinHoloListBtnPressed")
@@ -415,7 +414,7 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 		end
 		wndRaidMember:FindChild("RaidMemberHarmBuffBar"):Show(self.settings.bShowDebuffs)
 
-		self:DoHPAndShieldResizing(wndRaidMember:FindChild("RaidMemberBaseVitals"), unitMember, true, BetterRaidFrames)
+		self:DoHPAndShieldResizing(wndRaidMember:FindChild("RaidMemberBaseVitals"), unitMember, true)
 	end
 
 	-- Resize
@@ -427,13 +426,13 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 	end
 end
 
-function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame, strCharacterName, BetterRaidFrames)
+function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame, strCharacterName)
 	local wnd = wndFrame:FindChild("CurrHealthBar")
 	
 	-- Values may be nil if unit went out of range
 	if not nHealthCurr or not nHealthMax then
 		-- Update text to be empty, otherwise it will be stuck at the old value
-		if BetterRaidFrames.settings.bShowNames then
+		if self.BetterRaidFrames.settings.bShowNames then
 			wnd:SetText(" "..strCharacterName)
 		else
 			wnd:SetText(nil)
@@ -443,7 +442,7 @@ function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame,
 	
 	-- Unit might be dead
 	if nHealthCurr == 0 then
-		if BetterRaidFrames.settings.bShowNames then
+		if self.BetterRaidFrames.settings.bShowNames then
 			wnd:SetText(" "..strCharacterName.." (Dead)")
 		else
 			wnd:SetText("  ".."(Dead)")
@@ -452,9 +451,9 @@ function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame,
 	end
 	
 	-- No text needs to be drawn if all HP Text options are disabled
-	if not BetterRaidFrames.settings.bShowHP_Full and not BetterRaidFrames.settings.bShowHP_K and not BetterRaidFrames.settings.bShowHP_Pct then
+	if not self.BetterRaidFrames.settings.bShowHP_Full and not self.BetterRaidFrames.settings.bShowHP_K and not self.BetterRaidFrames.settings.bShowHP_Pct then
 		-- Update text to be empty, otherwise it will be stuck at the old value
-		if BetterRaidFrames.settings.bShowNames then
+		if self.BetterRaidFrames.settings.bShowNames then
 			wnd:SetText(" "..strCharacterName)
 		else
 			wnd:SetText(nil)
@@ -479,8 +478,8 @@ function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame,
 	end
 
 	-- Only ShowHP_Full selected
-	if BetterRaidFrames.settings.bShowHP_Full and not BetterRaidFrames.settings.bShowHP_K and not BetterRaidFrames.settings.bShowHP_Pct then
-		if BetterRaidFrames.settings.bShowNames then
+	if self.BetterRaidFrames.settings.bShowHP_Full and not self.BetterRaidFrames.settings.bShowHP_K and not self.BetterRaidFrames.settings.bShowHP_Pct then
+		if self.BetterRaidFrames.settings.bShowNames then
 			wnd:SetText(" "..strCharacterName.." - "..nHealthCurr.."/"..nHealthMax)
 		else
 			wnd:SetText(" "..nHealthCurr.."/"..nHealthMax)
@@ -489,8 +488,8 @@ function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame,
 	end
 
 	-- ShowHP_Full + Pct
-	if BetterRaidFrames.settings.bShowHP_Full and not BetterRaidFrames.settings.bShowHP_K and BetterRaidFrames.settings.bShowHP_Pct then
-		if BetterRaidFrames.settings.bShowNames then
+	if self.BetterRaidFrames.settings.bShowHP_Full and not self.BetterRaidFrames.settings.bShowHP_K and self.BetterRaidFrames.settings.bShowHP_Pct then
+		if self.BetterRaidFrames.settings.bShowNames then
 			wnd:SetText(" "..strCharacterName.." - "..nHealthCurr.."/"..nHealthMax.." ("..strHealthPercentage..")")
 		else
 			wnd:SetText(" "..nHealthCurr.."/"..nHealthMax.." ("..strHealthPercentage..")")
@@ -499,8 +498,8 @@ function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame,
 	end
 
 	-- Only ShowHP_K selected
-	if not BetterRaidFrames.settings.bShowHP_Full and BetterRaidFrames.settings.bShowHP_K and not BetterRaidFrames.settings.bShowHP_Pct then
-		if BetterRaidFrames.settings.bShowNames then
+	if not self.BetterRaidFrames.settings.bShowHP_Full and self.BetterRaidFrames.settings.bShowHP_K and not self.BetterRaidFrames.settings.bShowHP_Pct then
+		if self.BetterRaidFrames.settings.bShowNames then
 			wnd:SetText(" "..strCharacterName.." - "..strHealthCurrRounded.."/"..strHealthMaxRounded)
 		else
 			wnd:SetText(" "..strHealthCurrRounded.."/"..strHealthMaxRounded)
@@ -509,8 +508,8 @@ function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame,
 	end
 
 	-- ShowHP_K + Pct
-	if not BetterRaidFrames.settings.bShowHP_Full and BetterRaidFrames.settings.bShowHP_K and BetterRaidFrames.settings.bShowHP_Pct then
-		if BetterRaidFrames.settings.bShowNames then
+	if not self.BetterRaidFrames.settings.bShowHP_Full and self.BetterRaidFrames.settings.bShowHP_K and self.BetterRaidFrames.settings.bShowHP_Pct then
+		if self.BetterRaidFrames.settings.bShowNames then
 			wnd:SetText(" "..strCharacterName.." - "..strHealthCurrRounded.."/"..strHealthMaxRounded.." ("..strHealthPercentage..")")
 		else
 			wnd:SetText(" "..strHealthCurrRounded.."/"..strHealthMaxRounded.." ("..strHealthPercentage..")")
@@ -519,8 +518,8 @@ function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame,
 	end
 
 	-- Only Pct selected
-	if not BetterRaidFrames.settings.bShowHP_Full and not BetterRaidFrames.settings.bShowHP_K and BetterRaidFrames.settings.bShowHP_Pct then
-		if BetterRaidFrames.settings.bShowNames then
+	if not self.BetterRaidFrames.settings.bShowHP_Full and not self.BetterRaidFrames.settings.bShowHP_K and self.BetterRaidFrames.settings.bShowHP_Pct then
+		if self.BetterRaidFrames.settings.bShowNames then
 			wnd:SetText(" "..strCharacterName.." - "..strHealthPercentage)
 		else
 			wnd:SetText(" "..strHealthPercentage)
@@ -529,7 +528,7 @@ function BetterRaidFramesTearOff:UpdateHPText(nHealthCurr, nHealthMax, wndFrame,
 	end
 end
 
-function BetterRaidFramesTearOff:UpdateShieldText(nShieldCurr, nShieldMax, wndFrame, BetterRaidFrames)
+function BetterRaidFramesTearOff:UpdateShieldText(nShieldCurr, nShieldMax, wndFrame)
 	local wnd = wndFrame:FindChild("CurrShieldBar")
 
 	-- Values may be nil if unit went out of range
@@ -539,7 +538,7 @@ function BetterRaidFramesTearOff:UpdateShieldText(nShieldCurr, nShieldMax, wndFr
 	end
 	
 	-- Only update text if we are showing the shield bar
-	if not BetterRaidFrames.settings.bShowShieldBar then
+	if not self.BetterRaidFrames.settings.bShowShieldBar then
 		return
 	end
 
@@ -562,26 +561,26 @@ function BetterRaidFramesTearOff:UpdateShieldText(nShieldCurr, nShieldMax, wndFr
 	end
 
 	-- No text needs to be drawn if all Shield Text options are disabled
-	if not BetterRaidFrames.settings.bShowShield_K and not BetterRaidFrames.settings.bShowShield_Pct then
+	if not self.BetterRaidFrames.settings.bShowShield_K and not self.BetterRaidFrames.settings.bShowShield_Pct then
 		-- Update text to be empty, otherwise it will be stuck at the old value
 		wnd:SetText(nil)
 		return
 	end
 
 	-- Only Pct selected
-	if not BetterRaidFrames.settings.bShowShield_K and BetterRaidFrames.settings.bShowShield_Pct then
+	if not self.BetterRaidFrames.settings.bShowShield_K and self.BetterRaidFrames.settings.bShowShield_Pct then
 		wnd:SetText(strShieldPercentage)
 		return
 	end
 
 	-- Only ShowShield_K selected
-	if BetterRaidFrames.settings.bShowShield_K and not BetterRaidFrames.settings.bShowShield_Pct then
+	if self.BetterRaidFrames.settings.bShowShield_K and not self.BetterRaidFrames.settings.bShowShield_Pct then
 		wnd:SetText(strShieldCurrRounded)
 		return
 	end
 end
 
-function BetterRaidFramesTearOff:UpdateAbsorbText(nAbsorbCurr, wndFrame, BetterRaidFrames)
+function BetterRaidFramesTearOff:UpdateAbsorbText(nAbsorbCurr, wndFrame)
 	local wnd = wndFrame:FindChild("CurrAbsorbBar")
 
 	-- Values may be nil if unit went out of range
@@ -590,7 +589,7 @@ function BetterRaidFramesTearOff:UpdateAbsorbText(nAbsorbCurr, wndFrame, BetterR
 		return
 	end
 	-- Only update text if we are showing the shield bar
-	if not BetterRaidFrames.settings.bShowAbsorbBar then
+	if not self.BetterRaidFrames.settings.bShowAbsorbBar then
 		return
 	end
 
@@ -612,22 +611,22 @@ function BetterRaidFramesTearOff:UpdateAbsorbText(nAbsorbCurr, wndFrame, BetterR
 	end
 
 	-- No text needs to be drawn if all absorb text options are disabled
-	if not BetterRaidFrames.settings.bShowAbsorb_K then
+	if not self.BetterRaidFrames.settings.bShowAbsorb_K then
 		wnd:SetText(nil)
 		return
 	end
 
-	if BetterRaidFrames.settings.bShowAbsorb_K then
+	if self.BetterRaidFrames.settings.bShowAbsorb_K then
 		wnd:SetText(strAbsorbCurrRounded)
 		return
 	end
 end
 
-function BetterRaidFramesTearOff:TrackDebuffsHelper(unitMember, wndFrame, BetterRaidFrames)
+function BetterRaidFramesTearOff:TrackDebuffsHelper(unitMember, wndFrame)
 	local wnd = wndFrame:FindChild("CurrHealthBar")
 
 	-- Only continue if we are required to TrackDebuffs according to the settings
-	if not BetterRaidFrames.settings.bTrackDebuffs then
+	if not self.BetterRaidFrames.settings.bTrackDebuffs then
 		wnd:SetBarColor("ff26a614")
 		return
 	end
@@ -760,7 +759,7 @@ function BetterRaidFramesTearOff:OnEnteredCombat(unit, bInCombat)
 	end
 end
 
-function BetterRaidFramesTearOff:DoHPAndShieldResizing(wndBtnParent, unitPlayer, bBigSprites, BetterRaidFrames)
+function BetterRaidFramesTearOff:DoHPAndShieldResizing(wndBtnParent, unitPlayer, bBigSprites)
 	if unitPlayer and unitPlayer:GetHealth() then
 		local nHealthCurr 	= unitPlayer:GetHealth()
 		local nHealthMax 	= unitPlayer:GetMaxHealth()
@@ -786,14 +785,14 @@ function BetterRaidFramesTearOff:DoHPAndShieldResizing(wndBtnParent, unitPlayer,
 		local wndCurrHealthBar = wndBtnParent:FindChild("CurrHealthBar")
 
 		wndHealthBar:Show(true)
-		wndMaxAbsorb:Show(not bDead and BetterRaidFrames.settings.bShowAbsorbBar)
-		wndMaxShield:Show(not bDead and nShieldMax > 0 and BetterRaidFrames.settings.bShowShieldBar)
-		wndCurrShieldBar:Show(not bDead and nShieldMax > 0 and BetterRaidFrames.settings.bShowShieldBar)
+		wndMaxAbsorb:Show(not bDead and self.BetterRaidFrames.settings.bShowAbsorbBar)
+		wndMaxShield:Show(not bDead and nShieldMax > 0 and self.BetterRaidFrames.settings.bShowShieldBar)
+		wndCurrShieldBar:Show(not bDead and nShieldMax > 0 and self.BetterRaidFrames.settings.bShowShieldBar)
 		
-		if BetterRaidFrames.settings.bShowShieldBar then
+		if self.BetterRaidFrames.settings.bShowShieldBar then
 			self:SetBarValue(wndCurrShieldBar, 0, nShieldCurr, nShieldMax)
 		end
-		if BetterRaidFrames.settings.bShowAbsorbBar then
+		if self.BetterRaidFrames.settings.bShowAbsorbBar then
 			self:SetBarValue(wndCurrAbsorbBar, 0, nAbsorbCurr, nAbsorbMax)
 		end
 		self:SetBarValue(wndCurrHealthBar, 0, nHealthCurr, nHealthMax)
@@ -804,23 +803,23 @@ function BetterRaidFramesTearOff:DoHPAndShieldResizing(wndBtnParent, unitPlayer,
 		
 		-- Example usage for HP/Shield -> To have the start of the shield bar align with the end of the HP bar, Shield-Left must be HP-Right.
 		-- Define offsets based on settings of which bars to show
-		if BetterRaidFrames.settings.bShowShieldBar and BetterRaidFrames.settings.bShowAbsorbBar then
+		if self.BetterRaidFrames.settings.bShowShieldBar and self.BetterRaidFrames.settings.bShowAbsorbBar then
 			wndHealthBar:SetAnchorOffsets(nLeft, nTop, nWidth * 0.67, nBottom)
 			wndMaxShield:SetAnchorOffsets(nWidth * 0.67, nTop, nWidth * 0.85, nBottom)
 			wndMaxAbsorb:SetAnchorOffsets(nWidth * 0.85, nTop, nWidth, nBottom)
 		end
 	
-		if BetterRaidFrames.settings.bShowShieldBar and not BetterRaidFrames.settings.bShowAbsorbBar then
+		if self.BetterRaidFrames.settings.bShowShieldBar and not self.BetterRaidFrames.settings.bShowAbsorbBar then
 			wndHealthBar:SetAnchorOffsets(nLeft, nTop, nWidth * 0.75, nBottom)
 			wndMaxShield:SetAnchorOffsets(nWidth * 0.75, nTop, nWidth, nBottom)
 		end
 	
-		if not BetterRaidFrames.settings.bShowShieldBar and BetterRaidFrames.settings.bShowAbsorbBar then
+		if not self.BetterRaidFrames.settings.bShowShieldBar and self.BetterRaidFrames.settings.bShowAbsorbBar then
 			wndHealthBar:SetAnchorOffsets(nLeft, nTop, nWidth * 0.8, nBottom)
 			wndMaxAbsorb:SetAnchorOffsets(nWidth * 0.8, nTop, nWidth, nBottom)
 		end
 	
-		if not BetterRaidFrames.settings.bShowShieldBar and not BetterRaidFrames.settings.bShowAbsorbBar then
+		if not self.BetterRaidFrames.settings.bShowShieldBar and not self.BetterRaidFrames.settings.bShowAbsorbBar then
 			wndHealthBar:SetAnchorOffsets(nLeft, nTop, nWidth, nBottom)
 		end
 	end
