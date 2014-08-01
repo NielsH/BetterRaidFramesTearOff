@@ -175,6 +175,7 @@ function BetterRaidFramesTearOff:OnWindowManagementReady()
 	Event_FireGenericEvent("WindowManagementAdd", {wnd = self.wndMain, strName = Apollo.GetString("CRB_Options")})
 	Apollo.StartTimer("MainUpdateTimer")
 	self:LockFrameHelper(self.settings.bLockFrame)
+	self:BarTexturesHelper()
 	self:RefreshSettings()
 end
 
@@ -745,11 +746,6 @@ function BetterRaidFramesTearOff:LockFrameHelper(bLock)
 	self.wndMain:SetStyle("Sizable", not bLock)
 	self.wndMain:SetStyle("Moveable", not bLock)
 	self.wndMain:FindChild("RaidLockFrameBtn"):SetCheck(bLock)
-	if bLock then
-		self.wndMain:SetSprite("sprRaid_BaseNoArrow")
-	else
-		self.wndMain:SetSprite("sprRaid_Base")
-	end
 end
 
 function BetterRaidFramesTearOff:OnEnteredCombat(unit, bInCombat)
@@ -829,6 +825,14 @@ function BetterRaidFramesTearOff:SetBarValue(wndBar, fMin, fValue, fMax)
 	wndBar:SetMax(fMax)
 	wndBar:SetFloor(fMin)
 	wndBar:SetProgress(fValue)
+end
+
+function BetterRaidFramesTearOff:BarTexturesHelper()
+	if self.BetterRaidFrames.settings.bTransparency then
+		self.wndMain:FindChild("HoloFrame"):SetSprite("")
+	elseif not self.BetterRaidFrames.settings.bTransparency then
+		self.wndMain:FindChild("HoloFrame"):SetSprite("BK3:UI_BK3_Holo_Framing_3")
+	end
 end
 
 function BetterRaidFramesTearOff:RoundNumber(n)
