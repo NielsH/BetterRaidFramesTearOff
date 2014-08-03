@@ -696,6 +696,11 @@ function BetterRaidFramesTearOff:OnRaidTearMemberMouseUp(wndHandler, wndControl)
 	local unitMember = GroupLib.GetUnitForGroupMember(wndHandler:GetName())
 	if unitMember then
 		GameLib.SetTargetUnit(unitMember)
+		
+		if self.BetterRaidFrames.settings.bRememberPrevTarget then
+			self.PrevTarget = unitMember
+		end
+		
 		self:MainUpdateTimer()
 	end
 end
