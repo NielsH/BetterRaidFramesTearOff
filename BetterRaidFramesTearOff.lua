@@ -752,9 +752,12 @@ function BetterRaidFramesTearOff:LockFrameHelper(bLock)
 end
 
 function BetterRaidFramesTearOff:OnEnteredCombat(unit, bInCombat)
+	if self.settings.bLockFrame then
+		return
+	end
 	if self.wndMain and self.wndMain:IsValid() and self.wndMain:IsVisible() and unit == GameLib.GetPlayerUnit() and self.settings.bAutoLock_Combat then
 		self.wndMain:FindChild("RaidLockFrameBtn"):SetCheck(bInCombat)
-		self:OnRaidLockFrameBtnToggle(self.wndMain:FindChild("RaidLockFrameBtn"), self.wndMain:FindChild("RaidLockFrameBtn"))
+		self:LockFrameHelper(bInCombat)
 	end
 end
 
