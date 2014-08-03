@@ -216,10 +216,6 @@ function BetterRaidFramesTearOff:RefreshSettings()
 end
 
 function BetterRaidFramesTearOff:Initialize(nMemberIdx)
-	if self.wndMain and self.wndMain:IsValid() then
-		self.wndMain:FindChild("RaidTearOffContainer"):DestroyChildren()
-	end
-
 	if not nMemberIdx then
 		return
 	end
@@ -375,6 +371,8 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 		self:UpdateHPText(tMemberData.nHealth, tMemberData.nHealthMax, wndRaidMember, tMemberData.strCharacterName)
 		self:UpdateShieldText(tMemberData.nShield, tMemberData.nShieldMax, wndRaidMember)
 		self:UpdateAbsorbText(tMemberData.nAbsorption, wndRaidMember)
+		-- Update opacity if out of range
+		self:CheckRangeHelper(wndRaidMember, unitMember, tMemberData)
 
 		-- Target of Target
 		if tMemberData.bIsLeader or tMemberData.bMainTank or tMemberData.bMainAssist then
@@ -824,6 +822,39 @@ function BetterRaidFramesTearOff:DoHPAndShieldResizing(wndBtnParent, unitPlayer,
 			wndHealthBar:SetAnchorOffsets(nLeft, nTop, nWidth, nBottom)
 		end
 	end
+end
+
+function BetterRaidFramesTearOff:CheckRangeHelper(wndRaidMember, unitMember, tMemberData)
+	local opacity
+	
+	-- Use these variables to determine if opacity has to be set.
+	-- We use custom sprites, and no opacity change when OoR, dead, or offline
+	local bOutOfRange = tMemberData.nHealthMax == 0 or not unitMember
+	local bDead = tMemberData.nHealth == 0 and tMemberData.nHealthMax ~= 0
+	local bOffline = not tMemberData.bIsOnline
+
+	if self.BetterRaidFrames.settings.bCheckRange and not bOutOfRange and not bDead and not bOffline then
+		local player = GameLib.GetPlayerUnit()
+		if player == nil then return end
+
+		if unitMember ~= player and (unitMember == nil or not self:RangeCheck(unitMember, player, self.BetterRaidFrames.settings.fMaxRange)) then
+			opacity = 0.4
+		else
+			opacity = 1
+		end
+	end
+	wndRaidMember:FindChild("CurrHealthBar"):SetOpacity(opacity)
+	wndRaidMember:FindChild("CurrShieldBar"):SetOpacity(opacity)
+	wndRaidMember:FindChild("CurrAbsorbBar"):SetOpacity(opacity)
+end
+
+function BetterRaidFramesTearOff:RangeCheck(unit1, unit2, range)
+	local v1 = unit1:GetPosition()
+	local v2 = unit2:GetPosition()
+
+	local dx, dy, dz = v1.x - v2.x, v1.y - v2.y, v1.z - v2.z
+
+	return dx*dx + dy*dy + dz*dz <= range*range
 end
 
 function BetterRaidFramesTearOff:SetBarValue(wndBar, fMin, fValue, fMax)
