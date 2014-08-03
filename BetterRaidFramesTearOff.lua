@@ -349,7 +349,7 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 	end
 	wndRaidMember:FindChild("RaidMemberLeaderIcon"):Show(bShowLeaderIcon)
 
-	local bShowManaBar = self.settings.bShowFocus
+	local bShowManaBar = self.settings.bShowFocus and tMemberData.bHealer
 	local wndManaBar = self:LoadByName("RaidTearManaBar", wndRaidMember, "RaidTearManaBar")
 	if bShowManaBar and tMemberData.nMana and tMemberData.nMana > 0 then
 		local nManaMax
