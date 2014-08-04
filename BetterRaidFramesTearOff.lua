@@ -236,7 +236,7 @@ end
 -----------------------------------------------------------------------------------------------
 
 function BetterRaidFramesTearOff:MainUpdateTimer()
-	if not GroupLib.InRaid() then
+	if not GroupLib.InRaid() or self.BetterRaidFrames.settings.bDisableFrames then
 		if self.wndMain and self.wndMain:IsValid() and self.wndMain:IsShown() then
 			self.wndMain:Show(false)
 		end
