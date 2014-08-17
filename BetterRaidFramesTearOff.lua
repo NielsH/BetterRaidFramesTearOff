@@ -366,7 +366,11 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 		end
 		
 		-- Change the HP Bar Color if required for debuff tracking
-		self:TrackDebuffsHelper(unitMember, wndRaidMember)
+		local DebuffColorRequired = self:TrackDebuffsHelper(unitMember, wndRaidMember)
+		
+		-- Update Bar Colors
+		self:UpdateBarColors(wndRaidMember, DebuffColorRequired)
+		
 		-- Update text overlays		
 		self:UpdateHPText(tMemberData.nHealth, tMemberData.nHealthMax, wndRaidMember, tMemberData.strCharacterName)
 		self:UpdateShieldText(tMemberData.nShield, tMemberData.nShieldMax, wndRaidMember)
@@ -384,7 +388,11 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 				self:DoHPAndShieldResizing(wndRaidMember:FindChild("RaidMemberToTVitals"), unitToT, false)
 				
 				-- Change the HP Bar Color if required for debuff tracking
-				self:TrackDebuffsHelper(unitToT, wndRaidMember:FindChild("RaidMemberToTVitals"))
+				local DebuffColorRequired = self:TrackDebuffsHelper(unitToT, wndRaidMember:FindChild("RaidMemberToTVitals"))
+				
+				-- Update Bar Colors
+				self:UpdateBarColors(wndRaidMember:FindChild("RaidMemberToTVitals"), DebuffColorRequired)
+				
 				-- Update text overlays
 				self:UpdateHPText(unitToT:GetHealth(), unitToT:GetMaxHealth(), wndRaidMember:FindChild("RaidMemberToTVitals"), unitToT:GetName())
 				self:UpdateShieldText(unitToT:GetShieldCapacity(), unitToT:GetShieldCapacityMax(), wndRaidMember:FindChild("RaidMemberToTVitals"))
@@ -626,8 +634,7 @@ function BetterRaidFramesTearOff:TrackDebuffsHelper(unitMember, wndFrame)
 
 	-- Only continue if we are required to TrackDebuffs according to the settings
 	if not self.BetterRaidFrames.settings.bTrackDebuffs then
-		wnd:SetBarColor("ff26a614")
-		return
+		return false
 	end
 
 	local playerBuffs = unitMember:GetBuffs()
@@ -635,21 +642,34 @@ function BetterRaidFramesTearOff:TrackDebuffsHelper(unitMember, wndFrame)
     	
 	-- If player has no debuffs, change the color to normal in case it was changed before.
 	if next(debuffs) == nil then
-		wnd:SetBarColor('ff26a614')
-		return
+		return false
 	end
-
+	
 	-- Loop through all debuffs. Change HP bar color if class of splEffect equals 38, which means it is dispellable
 	for key, value in self:safePairs(debuffs) do
 		if value['splEffect']:GetClass() == 38 then
-			wnd:SetBarColor('xkcdDarkishPurple')
-			return
+			return true
 		end
 	end
 
 	-- Reset to normal sprite if there were debuffs but none of them were dispellable.
 	-- This might happen in cases where a player had a dispellable debuff -and- a non-dispellable debuff on him
-	wnd:SetBarColor('ff26a614')
+	return false
+end
+
+function BetterRaidFramesTearOff:UpdateBarColors(wndFrame, DebuffColorRequired)
+	local wndHP = wndFrame:FindChild("CurrHealthBar")
+	local wndShield = wndFrame:FindChild("CurrShieldBar")
+	local wndAbsorb = wndFrame:FindChild("CurrAbsorbBar")
+	
+	if DebuffColorRequired then
+		wndHP:SetBarColor(self.BetterRaidFrames.settings.strColorGeneral_HPDebuff)
+	else
+		wndHP:SetBarColor(self.BetterRaidFrames.settings.strColorGeneral_HPHealthy)
+	end
+	
+	wndShield:SetBarColor(self.BetterRaidFrames.settings.strColorGeneral_Shield)
+	wndAbsorb:SetBarColor(self.BetterRaidFrames.settings.strColorGeneral_Absorb)
 end
 
 -----------------------------------------------------------------------------------------------
