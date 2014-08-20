@@ -379,7 +379,7 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 		local DebuffColorRequired = self:TrackDebuffsHelper(unitMember, wndRaidMember)
 		
 		-- Update Bar Colors
-		self:UpdateBarColors(wndRaidMember, tMemberData, DebuffColorRequired)
+		self:UpdateBarColors(wndRaidMember, tMemberData, DebuffColorRequired, false) -- false relates to not ToL
 		
 		-- Update text overlays		
 		self:UpdateHPText(tMemberData.nHealth, tMemberData.nHealthMax, wndRaidMember, tMemberData.strCharacterName)
@@ -401,7 +401,7 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 				local DebuffColorRequired = self:TrackDebuffsHelper(unitToT, wndRaidMember:FindChild("RaidMemberToTVitals"))
 				
 				-- Update Bar Colors
-				self:UpdateBarColors(wndRaidMember:FindChild("RaidMemberToTVitals"), tMemberData, DebuffColorRequired)
+				self:UpdateBarColors(wndRaidMember:FindChild("RaidMemberToTVitals"), tMemberData, DebuffColorRequired, true) -- true related to this being ToL
 				
 				-- Update text overlays
 				self:UpdateHPText(unitToT:GetHealth(), unitToT:GetMaxHealth(), wndRaidMember:FindChild("RaidMemberToTVitals"), unitToT:GetName())
@@ -667,7 +667,7 @@ function BetterRaidFramesTearOff:TrackDebuffsHelper(unitMember, wndFrame)
 	return false
 end
 
-function BetterRaidFramesTearOff:UpdateBarColors(wndFrame, tMemberData, DebuffColorRequired)
+function BetterRaidFramesTearOff:UpdateBarColors(wndFrame, tMemberData, DebuffColorRequired, ToL)
 	local wndHP = wndFrame:FindChild("CurrHealthBar")
 	local wndShield = wndFrame:FindChild("CurrShieldBar")
 	local wndAbsorb = wndFrame:FindChild("CurrAbsorbBar")
@@ -677,7 +677,7 @@ function BetterRaidFramesTearOff:UpdateBarColors(wndFrame, tMemberData, DebuffCo
 	local ShieldBarColor
 	local AbsorbBarColor
 	
-	if self.BetterRaidFrames.settings.bClassSpecificBarColors then
+	if self.BetterRaidFrames.settings.bClassSpecificBarColors and not ToL then
 		local strClassKey = "strColor"..ktClassIdToClassName[tMemberData.eClassId]
 		HPHealthyColor = self.BetterRaidFrames.settings[strClassKey.."_HPHealthy"]
 		HPDebuffColor = self.BetterRaidFrames.settings[strClassKey.."_HPDebuff"]
