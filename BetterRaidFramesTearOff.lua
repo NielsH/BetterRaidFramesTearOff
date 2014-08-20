@@ -22,6 +22,16 @@ local LuaEnumSpriteColor =
 	Green = 3,
 }	
 
+local ktClassIdToClassName =
+{
+	[GameLib.CodeEnumClass.Esper] 			= "Esper",
+	[GameLib.CodeEnumClass.Medic] 			= "Medic",
+	[GameLib.CodeEnumClass.Stalker] 		= "Stalker",
+	[GameLib.CodeEnumClass.Warrior] 		= "Warrior",
+	[GameLib.CodeEnumClass.Engineer] 		= "Engineer",
+	[GameLib.CodeEnumClass.Spellslinger] 	= "Spellslinger",
+}
+
 local ktIdToRoleSprite =
 {
 	[-1] = "",
@@ -369,7 +379,7 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 		local DebuffColorRequired = self:TrackDebuffsHelper(unitMember, wndRaidMember)
 		
 		-- Update Bar Colors
-		self:UpdateBarColors(wndRaidMember, DebuffColorRequired)
+		self:UpdateBarColors(wndRaidMember, tMemberData, DebuffColorRequired)
 		
 		-- Update text overlays		
 		self:UpdateHPText(tMemberData.nHealth, tMemberData.nHealthMax, wndRaidMember, tMemberData.strCharacterName)
@@ -391,7 +401,7 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 				local DebuffColorRequired = self:TrackDebuffsHelper(unitToT, wndRaidMember:FindChild("RaidMemberToTVitals"))
 				
 				-- Update Bar Colors
-				self:UpdateBarColors(wndRaidMember:FindChild("RaidMemberToTVitals"), DebuffColorRequired)
+				self:UpdateBarColors(wndRaidMember:FindChild("RaidMemberToTVitals"), tMemberData, DebuffColorRequired)
 				
 				-- Update text overlays
 				self:UpdateHPText(unitToT:GetHealth(), unitToT:GetMaxHealth(), wndRaidMember:FindChild("RaidMemberToTVitals"), unitToT:GetName())
@@ -657,19 +667,37 @@ function BetterRaidFramesTearOff:TrackDebuffsHelper(unitMember, wndFrame)
 	return false
 end
 
-function BetterRaidFramesTearOff:UpdateBarColors(wndFrame, DebuffColorRequired)
+function BetterRaidFramesTearOff:UpdateBarColors(wndFrame, tMemberData, DebuffColorRequired)
 	local wndHP = wndFrame:FindChild("CurrHealthBar")
 	local wndShield = wndFrame:FindChild("CurrShieldBar")
 	local wndAbsorb = wndFrame:FindChild("CurrAbsorbBar")
 	
-	if DebuffColorRequired then
-		wndHP:SetBarColor(self.BetterRaidFrames.settings.strColorGeneral_HPDebuff)
+	local HPHealthyColor
+	local HPDebuffColor
+	local ShieldBarColor
+	local AbsorbBarColor
+	
+	if self.BetterRaidFrames.settings.bClassSpecificBarColors then
+		local strClassKey = "strColor"..ktClassIdToClassName[tMemberData.eClassId]
+		HPHealthyColor = self.BetterRaidFrames.settings[strClassKey.."_HPHealthy"]
+		HPDebuffColor = self.BetterRaidFrames.settings[strClassKey.."_HPDebuff"]
+		ShieldBarColor = self.BetterRaidFrames.settings[strClassKey.."_Shield"]
+		AbsorbBarColor = self.BetterRaidFrames.settings[strClassKey.."_Absorb"]
 	else
-		wndHP:SetBarColor(self.BetterRaidFrames.settings.strColorGeneral_HPHealthy)
+		HPHealthyColor = self.BetterRaidFrames.settings.strColorGeneral_HPHealthy
+		HPDebuffColor = self.BetterRaidFrames.settings.strColorGeneral_HPDebuff
+		ShieldBarColor = self.BetterRaidFrames.settings.strColorGeneral_Shield
+		AbsorbBarColor = self.BetterRaidFrames.settings.strColorGeneral_Absorb
+	end
+
+	if DebuffColorRequired then
+		wndHP:SetBarColor(HPDebuffColor)
+	else
+		wndHP:SetBarColor(HPHealthyColor)
 	end
 	
-	wndShield:SetBarColor(self.BetterRaidFrames.settings.strColorGeneral_Shield)
-	wndAbsorb:SetBarColor(self.BetterRaidFrames.settings.strColorGeneral_Absorb)
+	wndShield:SetBarColor(ShieldBarColor)
+	wndAbsorb:SetBarColor(AbsorbBarColor)
 end
 
 -----------------------------------------------------------------------------------------------
