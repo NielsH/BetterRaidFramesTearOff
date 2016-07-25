@@ -4,6 +4,7 @@
 -----------------------------------------------------------------------------------------------
 
 require "Window"
+require "MatchMakingLib"
 
 local BetterRaidFramesTearOff = {}
 
@@ -35,17 +36,17 @@ local ktClassIdToClassName =
 local ktIdToRoleSprite =
 {
 	[-1] = "",
-	[MatchingGame.Roles.DPS] = "sprRaid_Icon_RoleDPS",
-	[MatchingGame.Roles.Healer] = "sprRaid_Icon_RoleHealer",
-	[MatchingGame.Roles.Tank] = "sprRaid_Icon_RoleTank",
+	[MatchMakingLib.Roles.DPS] = "sprRaid_Icon_RoleDPS",
+	[MatchMakingLib.Roles.Healer] = "sprRaid_Icon_RoleHealer",
+	[MatchMakingLib.Roles.Tank] = "sprRaid_Icon_RoleTank",
 }
 
 local ktIdToRoleTooltip =
 {
 	[-1] = "",
-	[MatchingGame.Roles.DPS] = "CRB_DPS",
-	[MatchingGame.Roles.Healer] = "CRB_Healer",
-	[MatchingGame.Roles.Tank] = "CRB_Tank",
+	[MatchMakingLib.Roles.DPS] = "CRB_DPS",
+	[MatchMakingLib.Roles.Healer] = "CRB_Healer",
+	[MatchMakingLib.Roles.Tank] = "CRB_Tank",
 }
 
 local ktIdToLeaderSprite =  -- 0 is valid
@@ -327,11 +328,11 @@ function BetterRaidFramesTearOff:UpdateSpecificMember(nMemberIdx, unitMember, tM
 	if bShowRoleIcon then
 		local eRoleIdx = -1
 		if tMemberData.bDPS then
-			eRoleIdx = MatchingGame.Roles.DPS
+			eRoleIdx = MatchMakingLib.Roles.DPS
 		elseif tMemberData.bHealer then
-			eRoleIdx = MatchingGame.Roles.Healer
+			eRoleIdx = MatchMakingLib.Roles.Healer
 		elseif tMemberData.bTank then
-			eRoleIdx = MatchingGame.Roles.Tank
+			eRoleIdx = MatchMakingLib.Roles.Tank
 		end
 		wndRaidMember:FindChild("RaidMemberRoleIconSprite"):SetSprite(ktIdToRoleSprite[eRoleIdx])
 		wndRaidMember:FindChild("RaidMemberRoleIconSprite"):SetTooltip(Apollo.GetString(ktIdToRoleTooltip[eRoleIdx]))
